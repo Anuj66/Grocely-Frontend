@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import Context from '../context/Product/ProductContext'
 import {Link, useNavigate} from "react-router-dom";
+import Alert from "./Alert";
 
 const UserCart = () => {
 
@@ -13,6 +14,8 @@ const UserCart = () => {
     const [prod, setProd] = useState({id: '', stock: ''})
     const navigator = useNavigate()
     const [totalAmount, setTotalAmount] = useState(0)
+    const [invalid, setInvalid] = useState(false)
+    const [error, setError] = useState('Please enter the correct values!')
 
     useEffect(async () => {
         let tempCartProducts = await getCartProducts()
@@ -63,6 +66,7 @@ const UserCart = () => {
     }
 
     const handleUpdateClick = (product) => {
+        setInvalid(false)
         refOpen.current.click()
         setQuantity(product.quantity)
         setProd({id: product.product, stock: product.stock})
@@ -73,7 +77,14 @@ const UserCart = () => {
     }
 
     const updateCart = async () => {
-        if(quantity > 0 && quantity <= prod.stock){
+
+        if(quantity <= 0){
+            setInvalid(true)
+            setError('Please enter a valid Quantity!')
+        }else if(quantity > prod.stock){
+            setInvalid(true)
+            setError('Quantity entered is more than stock!, Please enter less than stock')
+        }else{
             const response = await fetch(`${urlBuyer}/updateProduct/${prod.id}`, {
                 method: 'PUT',
                 headers: {
@@ -98,9 +109,8 @@ const UserCart = () => {
             }else{
                 alert(data.error)
             }
-        }else{
-            alert('Quantity entered is either invalid or more than stock')
         }
+
     }
 
     const updateProduct = async (product) => {
@@ -164,6 +174,7 @@ const UserCart = () => {
                         </div>
                         <div className="modal-body">
                             <div className="mb-3">
+                                <Alert invalid={invalid} error={error}/>
                                 <label htmlFor="quantity" className="form-label">Quantity</label>
                                 <input type="number" className="form-control" id="quantity" name={"quantity"} onChange={onChange} value={quantity} required={true}/>
                             </div>

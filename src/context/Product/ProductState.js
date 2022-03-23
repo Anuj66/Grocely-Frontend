@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useState} from 'react'
 import ProductContext from "./ProductContext";
 
 const ProductState = (props) => {
@@ -8,6 +8,7 @@ const ProductState = (props) => {
     const urlProductType = 'http://localhost:8080/api/productType'
     const urlBuyer = 'http://localhost:8080/api/buyer'
     const [currentProduct, setCurrentProduct] = useState({id: '', name: '', type: '', stock: '', price: ''})
+    const [signUp, setSignUp] = useState(false);
 
 
     //Get Vendor Detail
@@ -100,7 +101,21 @@ const ProductState = (props) => {
     }
 
     return (
-        <ProductContext.Provider value={{urlAuth, getCartProducts, urlProduct, getAllVendorProducts, getVendorDetails, urlBuyer, urlProductType, getAllProductType, currentProduct, setCurrentProduct, getAllVendors, getAllProducts}}>
+        <ProductContext.Provider value={{urlAuth,
+            getCartProducts,
+            urlProduct,
+            getAllVendorProducts,
+            getVendorDetails,
+            urlBuyer,
+            urlProductType,
+            getAllProductType,
+            currentProduct,
+            setCurrentProduct,
+            getAllVendors,
+            getAllProducts,
+            signUp,
+            setSignUp
+        }}>
             {props.children}
         </ProductContext.Provider>
     )

@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useState} from 'react'
 import {Link, useNavigate} from "react-router-dom";
 import Context from '../context/Product/ProductContext'
+import Alert from "./Alert";
 
 const UpdateProduct = () => {
 
@@ -8,6 +9,8 @@ const UpdateProduct = () => {
     const {currentProduct, setCurrentProduct, getAllProductType, urlProduct} = context
     const [productTypes, setProductTypes] = useState([])
     const navigator = useNavigate()
+    const [invalid, setInvalid] = useState(false)
+    const [error, setError] = useState('Please enter the correct values!')
 
     useEffect(async () => {
         if(localStorage.getItem('jwt_token') && localStorage.getItem('role') === 'Vendor'){
@@ -26,21 +29,46 @@ const UpdateProduct = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        const response = await fetch(`${urlProduct}/updateProduct/${currentProduct._id}`,{
-            method: "PUT",
-            headers: {
-                'Content-Type': 'application/json',
-                'jwt_token': localStorage.getItem('jwt_token')
-            },
-            body: JSON.stringify({name: currentProduct.name, type: currentProduct.type, stock: currentProduct.stock, price: currentProduct.price})
-        })
-        const data = await response.json()
-        navigator('/vendorhome')
+
+        if(currentProduct.name.length < 3){
+            setInvalid(true)
+            setError('Please check name: Minimum 3 characters are required!')
+        }else if(currentProduct.stock <= 0){
+            setInvalid(true)
+            setError('Please enter the valid stock value!')
+        }else if(currentProduct.price <= 0){
+            setInvalid(true)
+            setError('Please enter the valid price value!')
+        }else if(!currentProduct.type){
+            setInvalid(true)
+            setError('Please select the product type!')
+        }else{
+            let tempProductType = productTypes.filter((productType) => {return productType.name === currentProduct.type})
+
+            const response = await fetch(`${urlProduct}/updateProduct/${currentProduct._id}`,{
+                method: "PUT",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'jwt_token': localStorage.getItem('jwt_token')
+                },
+                body: JSON.stringify({name: currentProduct.name, type: tempProductType._id, stock: currentProduct.stock, price: currentProduct.price})
+            })
+            const data = await response.json()
+            if(data.success){
+                navigator('/vendorhome')
+            }else{
+                setInvalid(true)
+                setError('Invalid Details entered!')
+            }
+        }
     }
 
     return (
         <div className={"container"}>
-            <h3>Please enter product details</h3>
+            <h3 className={"my-3"}>Please enter product details</h3>
+
+            <Alert invalid={invalid} error={error}/>
+
             <form onSubmit={handleSubmit}>
                 <div className="mb-3">
                     <label htmlFor="name" className="form-label">Name</label>
@@ -49,7 +77,7 @@ const UpdateProduct = () => {
                 <div className="mb-3">
                     <label htmlFor="type" className="form-label">Type</label>
                     <select className="form-select" aria-label="Default select example" id={"type"} name={"type"} onChange={onChange} required={true}>
-                        <option selected>Select Product Type</option>
+                        <option selected>{currentProduct.type}</option>
                         {productTypes.map((productType) => {
                             return <option key={productType._id} value={productType._id}>{productType.name}</option>
                         })}

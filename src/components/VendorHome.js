@@ -70,12 +70,12 @@ const VendorHome = () => {
                 {products.map((product, index) => {
                     return <tr>
                         <th key={index}>{index+1}</th>
+                        <td>{product.name}</td>
                         <td>{product.type}</td>
                         <td>{product.stock}</td>
                         <td><i className="fa-solid fa-indian-rupee-sign"></i> {product.price}</td>
                         <td><i className="fa-solid fa-pen editIcon" onClick={() => {handleUpdateOnClick(product)}}></i></td>
                         <td><i className="fa-solid fa-trash deleteIcon" onClick={() => {handleDeleteOnClick(product._id)}}></i></td>
-                        <td>{product.name}</td>
                     </tr>
                 })}
 

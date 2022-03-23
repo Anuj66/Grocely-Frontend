@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import Context from '../context/Product/ProductContext'
 import {Link, useNavigate} from "react-router-dom";
+import Alert from "./Alert";
 
 const UserHome = () => {
 
@@ -12,6 +13,8 @@ const UserHome = () => {
     const refOpen = useRef(null)
     const refClose = useRef(null)
     const [prod, setProd] = useState({id: '', name: '', vendor: '', type: '', stock: '', price: '', quantity: ''})
+    const [invalid, setInvalid] = useState(false)
+    const [error, setError] = useState('Please enter the correct values!')
 
     useEffect(async () => {
         if(localStorage.getItem('jwt_token') && localStorage.getItem('role') === 'User'){
@@ -44,13 +47,20 @@ const UserHome = () => {
     }
 
     const handleCartClick = (product) => {
+        setInvalid(false)
         refOpen.current.click()
         setQuantity(0)
         setProd({id: product._id, name: product.name, type: product.type, vendor: product.vendor, stock: product.stock, price: product.price})
     }
 
     const addToCart = async () => {
-        if(quantity > 0 && quantity <= prod.stock){
+        if(quantity <= 0){
+            setInvalid(true)
+            setError('Please enter a valid Quantity!')
+        }else if(quantity > prod.stock){
+            setInvalid(true)
+            setError('Quantity entered is more than stock!, Please enter less than stock')
+        }else{
             const response = await fetch(`${urlBuyer}/addProduct`, {
                 method: "POST",
                 headers: {
@@ -70,8 +80,6 @@ const UserHome = () => {
             refClose.current.click()
             navigator('/userhome')
             alert('Added to Cart Successfully')
-        }else{
-            alert('Quantity entered is either invalid or more than stock')
         }
     }
 
@@ -90,11 +98,15 @@ const UserHome = () => {
                     <div className="modal-content">
                         <div className="modal-header">
                             <h5 className="modal-title" id="exampleModalLabel">Add Quantity</h5>
+
+
+
                             <button type="button" className="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                         </div>
                         <div className="modal-body">
                             <div className="mb-3">
+                                <Alert invalid={invalid} error={error}/>
                                 <label htmlFor="quantity" className="form-label">Quantity</label>
                                 <input type="number" className="form-control" id="quantity" name={"quantity"} onChange={onChange} value={quantity} required={true}/>
                             </div>
